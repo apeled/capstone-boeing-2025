@@ -18,7 +18,7 @@ ranklab_env\Scripts\activate
 
 ## 2️⃣ Install Python Dependencies
 ```
-pip install dash dash-bootstrap-components plotly pandas rpy2
+pip install dash dash-bootstrap-components plotly pandas rpy2 dash-ag-grid
 ```
 
 ## 3️⃣ Install R Dependencies
