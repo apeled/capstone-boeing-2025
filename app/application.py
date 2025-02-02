@@ -1,4 +1,4 @@
-mport dash
+import dash
 import dash_bootstrap_components as dbc
 from dash import dcc, html, Input, Output, State
 import dash_ag_grid as dag
