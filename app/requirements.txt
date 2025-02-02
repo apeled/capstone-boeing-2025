@@ -1,0 +1,6 @@
+# requirements.txt
+dash==2.14.2
+dash-bootstrap-components==1.5.0
+pandas==2.1.4
+gunicorn==21.2.0
+rpy2==3.5.14

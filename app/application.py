@@ -1,17 +1,23 @@
-import dash
+mport dash
 import dash_bootstrap_components as dbc
 from dash import dcc, html, Input, Output, State
 import pandas as pd
 import subprocess
 import json
+import os
+
+# Updated path handling for AWS
+app_directory = os.path.dirname(os.path.abspath(__file__))
+data_path = os.path.join(app_directory, "data", "Rank.csv")
+model_path = os.path.join(app_directory, "models", "rank_model.R")
 
 # Load dataset
-df = pd.read_csv("../data/Rank.csv")
+df = pd.read_csv(data_path)
 driver_columns = df.columns[2:19].tolist()
 
 # Dash App Setup
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
-app.title = "RankLab: An Interactive Web Application for Multi-Criteria Decision Analysis Rank Prediction"
+application = app.server  # This is needed for AWS Elastic Beanstalk
 
 app.layout = dbc.Container([
     html.H1("RankLab: Rank Prediction Tool"),
@@ -54,4 +60,4 @@ def predict_rank(n_clicks, *selected_factors):
         return "Prediction error. Please check input."
 
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    application.run(host='0.0.0.0', port=8080)

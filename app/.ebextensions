@@ -1,0 +1,7 @@
+# .ebextensions/01_packages.config
+packages:
+  yum:
+    R: []
+    R-devel: []
+    gcc-c++: []
+    python3-devel: []
