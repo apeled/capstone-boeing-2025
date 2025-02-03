@@ -51,10 +51,10 @@ about_me_tab = dbc.Container([
 ], className="mt-4")
 
 # App Layout with Title & Tabs
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
-app.title = "RankLab: Rank Prediction Tool"
+application = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+application.title = "RankLab: Rank Prediction Tool"
 
-app.layout = dbc.Container([
+application.layout = dbc.Container([
     html.H1("RankLab: Rank Prediction Tool", className="text-center mt-4"),  # Title above tabs
     dbc.Tabs([
         dbc.Tab(rank_prediction_tab, label="Rank Prediction"),
@@ -63,7 +63,7 @@ app.layout = dbc.Container([
 ])
 
 # Callback for prediction & visualization
-@app.callback(
+@application.callback(
     [Output("prediction-output", "children"), Output("factor-distribution", "figure")],
     Input("predict-btn", "n_clicks"),
     State("input-grid", "rowData"),
@@ -107,4 +107,4 @@ def predict_rank(n_clicks, row_data):
         return "Prediction error. Please check input.", {}
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=8080)
+    application.run(host='0.0.0.0', port=8080)
