@@ -106,6 +106,5 @@ def predict_rank(n_clicks, row_data):
     except:
         return "Prediction error. Please check input.", {}
 
-
 if __name__ == "__main__":
-    application.run(host='0.0.0.0', port=8080)
+    app.run(host='0.0.0.0', port=8080)
