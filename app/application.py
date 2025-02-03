@@ -8,7 +8,7 @@ import json
 import plotly.express as px
 
 # Load dataset
-df = pd.read_csv(data_path)
+df = pd.read_csv('../data/Rank.csv')
 driver_columns = df.columns[2:19].tolist()
 
 # Generate column definitions for AG Grid
