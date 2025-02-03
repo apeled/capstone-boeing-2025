@@ -106,5 +106,8 @@ def predict_rank(n_clicks, row_data):
     except:
         return "Prediction error. Please check input.", {}
 
+# Expose the server for Gunicorn to run
+server = app.server
+
 if __name__ == "__main__":
     app.run_server(host='0.0.0.0', port=8050)
