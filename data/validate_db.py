@@ -1,4 +1,3 @@
-#python validate_db.py --db rankings.db --csv Rank.CSV
 import sqlite3
 import pandas as pd
 import argparse
@@ -10,8 +9,8 @@ def validate_database(db_path, csv_path=None):
     Validate the SQLite database:
     1. Check if tables exist
     2. Check for data integrity
-    3. Verify data matches CSV if provided
-    4. Validate relationships and constraints
+    3. Verify SongFlag is set to TRUE for all records
+    4. Verify CSV data if provided
     """
     if not Path(db_path).exists():
         print(f"Error: Database file not found at {db_path}")
@@ -23,19 +22,16 @@ def validate_database(db_path, csv_path=None):
         
         print(f"\n=== Validating database: {db_path} ===")
         
-        # 1. Check if tables exist
+        # 1. Check if table exists
         cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
         tables = cursor.fetchall()
         table_names = [table[0] for table in tables]
         
-        required_tables = ['Rankings', 'RankingHistory']
-        missing_tables = [table for table in required_tables if table not in table_names]
-        
-        if missing_tables:
-            print(f"Error: Missing required tables: {', '.join(missing_tables)}")
+        if 'Rankings' not in table_names:
+            print(f"Error: Rankings table not found")
             return False
         else:
-            print(f"✓ All required tables exist: {', '.join(required_tables)}")
+            print(f"✓ Rankings table exists")
         
         # 2. Check for data integrity
         # Check if Rankings table has data
@@ -47,11 +43,6 @@ def validate_database(db_path, csv_path=None):
             print("Warning: Rankings table is empty")
             return False
         
-        # Check if RankingHistory table has data
-        cursor.execute("SELECT COUNT(*) FROM RankingHistory")
-        history_count = cursor.fetchone()[0]
-        print(f"✓ RankingHistory table contains {history_count} records")
-        
         # 3. Verify column structure
         cursor.execute("PRAGMA table_info(Rankings)")
         columns = cursor.fetchall()
@@ -62,7 +53,7 @@ def validate_database(db_path, csv_path=None):
             'Driver1', 'Driver2', 'Driver3', 'Driver4', 'Driver5', 
             'Driver6', 'Driver7', 'Driver8', 'Driver9', 'Driver10', 
             'Driver11', 'Driver12', 'Driver13', 'Driver14', 'Driver15', 
-            'Driver16', 'Driver17', 'UpdateDT', 'PrevRank', 'PrevUpdateDT', 'RankChange'
+            'Driver16', 'Driver17', 'UpdateDT', 'SongFlag'
         ]
         
         missing_columns = [col for col in required_columns if col not in column_names]
@@ -72,47 +63,19 @@ def validate_database(db_path, csv_path=None):
         else:
             print(f"✓ Rankings table has all required columns")
         
-        # 4. Check data consistency
-        cursor.execute("""
-        SELECT r.SubjectID, r.Rank, r.UpdateDT, r.PrevRank, r.RankChange,
-               h.Rank, h.UpdateDT, h.PrevRank, h.RankChange
-        FROM Rankings r
-        JOIN RankingHistory h ON r.SubjectID = h.SubjectID AND r.UpdateDT = h.UpdateDT
-        LIMIT 10
-        """)
-        consistency_check = cursor.fetchall()
+        # 4. Verify SongFlag is TRUE for all records
+        cursor.execute("SELECT COUNT(*) FROM Rankings WHERE SongFlag = 1")
+        true_flag_count = cursor.fetchone()[0]
         
-        consistency_issues = 0
-        for record in consistency_check:
-            if record[1] != record[5] or record[3] != record[7] or record[4] != record[8]:
-                consistency_issues += 1
-                print(f"Data inconsistency found for SubjectID {record[0]}")
+        cursor.execute("SELECT COUNT(*) FROM Rankings WHERE SongFlag IS NULL OR SongFlag = 0")
+        false_flag_count = cursor.fetchone()[0]
         
-        if consistency_issues == 0:
-            print("✓ Sample data consistency check passed between Rankings and RankingHistory tables")
+        if true_flag_count == rankings_count:
+            print(f"✓ All {true_flag_count} records have SongFlag set to TRUE")
+        else:
+            print(f"Error: Expected all records to have SongFlag=TRUE, but found {false_flag_count} records with FALSE or NULL")
         
-        # 5. Verify RankChange calculation correctness
-        cursor.execute("""
-        SELECT SubjectID, Rank, PrevRank, RankChange
-        FROM Rankings
-        WHERE PrevRank IS NOT NULL
-        LIMIT 10
-        """)
-        rank_change_records = cursor.fetchall()
-        
-        rank_change_issues = 0
-        for record in rank_change_records:
-            expected_change = record[2] - record[1]  # PrevRank - Rank
-            if record[3] != expected_change:
-                rank_change_issues += 1
-                print(f"RankChange calculation issue for SubjectID {record[0]}: Expected {expected_change}, found {record[3]}")
-        
-        if rank_change_issues == 0 and len(rank_change_records) > 0:
-            print("✓ RankChange calculations are correct")
-        elif len(rank_change_records) == 0:
-            print("Note: No records with previous rankings to verify RankChange calculations")
-        
-        # 6. Verify against CSV if provided
+        # 5. Verify against CSV if provided
         if csv_path and os.path.exists(csv_path):
             try:
                 csv_data = pd.read_csv(csv_path)
@@ -120,15 +83,35 @@ def validate_database(db_path, csv_path=None):
                 
                 # Check if all SubjectIDs from CSV exist in database
                 subject_ids = set(csv_data['SubjectID'])
+                missing_subjects = []
                 for subject_id in subject_ids:
                     cursor.execute("SELECT COUNT(*) FROM Rankings WHERE SubjectID = ?", (subject_id,))
                     count = cursor.fetchone()[0]
                     if count == 0:
-                        print(f"Warning: SubjectID {subject_id} from CSV not found in database")
+                        missing_subjects.append(subject_id)
                 
-                print("✓ CSV validation complete")
+                if missing_subjects:
+                    print(f"Warning: {len(missing_subjects)} SubjectIDs from CSV not found in database")
+                else:
+                    print("✓ All SubjectIDs from CSV found in database")
+                
+                # Check record count
+                if len(csv_data) == rankings_count:
+                    print(f"✓ Record count matches: {rankings_count} records in database, {len(csv_data)} in CSV")
+                else:
+                    print(f"Warning: Record count mismatch: {rankings_count} records in database, {len(csv_data)} in CSV")
+                
             except Exception as e:
                 print(f"Error validating against CSV: {str(e)}")
+        
+        # Show sample data
+        cursor.execute("SELECT SubjectID, Rank, UpdateDT, SongFlag FROM Rankings LIMIT 5")
+        sample = cursor.fetchall()
+        
+        if sample:
+            print("\nSample data from database:")
+            for row in sample:
+                print(f"  SubjectID: {row[0]}, Rank: {row[1]}, UpdateDT: {row[2]}, SongFlag: {'TRUE' if row[3] else 'FALSE'}")
         
         print("\n✓ Database validation completed successfully")
         return True
@@ -143,8 +126,4 @@ def validate_database(db_path, csv_path=None):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Validate SQLite database with ranking data')
     parser.add_argument('--db', required=True, help='Path to the SQLite database')
-    parser.add_argument('--csv', help='Optional path to the original CSV file for cross-validation')
-    
-    args = parser.parse_args()
-    
-    validate_database(args.db, args.csv)
+    parser.add_argumen

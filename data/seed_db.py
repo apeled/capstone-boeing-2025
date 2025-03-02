@@ -1,5 +1,3 @@
-#python seed_db.py --csv Rank.CSV --db rankings.db
-
 import csv
 import sqlite3
 import datetime
@@ -11,7 +9,7 @@ def create_database(db_path):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     
-    # Create main rankings table
+    # Create main rankings table with only the specified columns
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS Rankings (
         SubjectID TEXT,
@@ -34,40 +32,13 @@ def create_database(db_path):
         Driver16 TEXT,
         Driver17 TEXT,
         UpdateDT TEXT,
-        PrevRank INTEGER,
-        PrevUpdateDT TEXT,
-        RankChange INTEGER,
-        PRIMARY KEY (SubjectID, UpdateDT)
-    )
-    ''')
-    
-    # Create history table to track changes
-    cursor.execute('''
-    CREATE TABLE IF NOT EXISTS RankingHistory (
-        SubjectID TEXT,
-        Rank INTEGER,
-        UpdateDT TEXT,
-        PrevRank INTEGER,
-        RankChange INTEGER,
+        SongFlag BOOLEAN,
         PRIMARY KEY (SubjectID, UpdateDT)
     )
     ''')
     
     conn.commit()
     return conn
-
-def load_existing_ranking(cursor, subject_id):
-    """Load the most recent ranking for a subject if it exists"""
-    cursor.execute('''
-    SELECT Rank, UpdateDT FROM Rankings 
-    WHERE SubjectID = ? 
-    ORDER BY UpdateDT DESC LIMIT 1
-    ''', (subject_id,))
-    
-    result = cursor.fetchone()
-    if result:
-        return {"rank": result[0], "update_dt": result[1]}
-    return None
 
 def seed_database(csv_path, db_path):
     """Seed the database with data from CSV file"""
@@ -93,45 +64,26 @@ def seed_database(csv_path, db_path):
                 # Assuming this is a placeholder and we should use current datetime
                 update_dt = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
             
-            # Get previous rank if available
-            prev_data = load_existing_ranking(cursor, subject_id)
-            
-            prev_rank = None
-            prev_update_dt = None
-            rank_change = None
-            
-            if prev_data:
-                prev_rank = prev_data["rank"]
-                prev_update_dt = prev_data["update_dt"]
-                rank_change = prev_rank - current_rank  # Positive means improved rank
-            
-            # Insert into Rankings table
+            # Insert into Rankings table with SongFlag set to true (1 in SQLite)
             cursor.execute('''
             INSERT INTO Rankings (
                 SubjectID, Rank, 
                 Driver1, Driver2, Driver3, Driver4, Driver5, 
                 Driver6, Driver7, Driver8, Driver9, Driver10, 
                 Driver11, Driver12, Driver13, Driver14, Driver15, 
-                Driver16, Driver17, UpdateDT, PrevRank, PrevUpdateDT, RankChange
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                Driver16, Driver17, UpdateDT, SongFlag
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
                 subject_id, current_rank,
                 row['Driver1'], row['Driver2'], row['Driver3'], row['Driver4'], row['Driver5'],
                 row['Driver6'], row['Driver7'], row['Driver8'], row['Driver9'], row['Driver10'],
                 row['Driver11'], row['Driver12'], row['Driver13'], row['Driver14'], row['Driver15'],
-                row['Driver16'], row['Driver17'], update_dt, prev_rank, prev_update_dt, rank_change
+                row['Driver16'], row['Driver17'], update_dt, 1  # 1 means TRUE for SongFlag
             ))
-            
-            # Insert into RankingHistory table
-            cursor.execute('''
-            INSERT INTO RankingHistory (
-                SubjectID, Rank, UpdateDT, PrevRank, RankChange
-            ) VALUES (?, ?, ?, ?, ?)
-            ''', (subject_id, current_rank, update_dt, prev_rank, rank_change))
     
     conn.commit()
     conn.close()
-    print(f"Database successfully seeded from {csv_path} to {db_path}")
+    print(f"Database successfully seeded from {csv_path} to {db_path} with SongFlag set to TRUE")
 
 if __name__ == "__main__":
     import argparse
