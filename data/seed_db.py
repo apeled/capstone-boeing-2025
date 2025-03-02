@@ -91,7 +91,7 @@ def seed_database(csv_path, db_path):
             # Format date properly if it's in ####### format
             if update_dt.startswith('#') and update_dt.endswith('#'):
                 # Assuming this is a placeholder and we should use current datetime
-                update_dt = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                update_dt = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
             
             # Get previous rank if available
             prev_data = load_existing_ranking(cursor, subject_id)
