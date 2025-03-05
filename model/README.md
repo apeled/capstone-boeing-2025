@@ -1,10 +1,8 @@
-# Multi-Criteria Decision Analysis and Rank Prediction
-
-This repository contains a comprehensive analysis and prediction system for ordinal ranks generated from multiple decision criteria. The project focuses on identifying key rank drivers, predicting future ranks, applying proper ordinal modeling techniques, handling high dimensionality data, and maintaining interpretability for decision analysis.
+Comprehensive analysis and prediction system for ordinal ranks generated from multiple decision criteria. The project focuses on identifying key rank drivers, predicting future ranks, applying proper ordinal modeling techniques, handling high dimensionality data, and maintaining interpretability for decision analysis.
 
 ## Repository Structure
 
-### Root Directory
+### Folder Directory
 
 - **enhanced-rank-prediction.ipynb**: Enhanced notebook with additional features and improvements over the base model
 - **mcda-rank-prediction.ipynb**: Main notebook containing the Multi-Criteria Decision Analysis and rank prediction methodology
