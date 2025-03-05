@@ -4,7 +4,6 @@ Comprehensive analysis and prediction system for ordinal ranks generated from mu
 
 ### Folder Directory
 
-- **enhanced-rank-prediction.ipynb**: Enhanced notebook with additional features and improvements over the base model
 - **mcda-rank-prediction.ipynb**: Main notebook containing the Multi-Criteria Decision Analysis and rank prediction methodology
 - **model_summary.csv**: Summary of all trained models and their performance metrics
 - **Rank.csv**: Original dataset with rank information and drivers
