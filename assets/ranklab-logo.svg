@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600">
+  <defs>
+    <radialGradient id="circleGradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+      <stop offset="0%" style="stop-color:#B0B2B5" />
+      <stop offset="100%" style="stop-color:#808285" />
+    </radialGradient>
+  </defs>
+  
+  <!-- Main Circle -->
+  <circle cx="300" cy="300" r="250" fill="url(#circleGradient)" />
+  
+  <!-- RL Letters -->
+  <text x="300" y="350" font-family="Arial, sans-serif" font-size="160" font-weight="bold" fill="white" text-anchor="middle">RL</text>
+
+</svg>
