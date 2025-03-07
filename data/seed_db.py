@@ -32,7 +32,7 @@ def create_database(db_path):
         Driver16 TEXT,
         Driver17 TEXT,
         UpdateDT TEXT,
-        SongFlag BOOLEAN,
+        OriginalDataFlag BOOLEAN,
         PRIMARY KEY (SubjectID, UpdateDT)
     )
     ''')
@@ -64,26 +64,26 @@ def seed_database(csv_path, db_path):
                 # Assuming this is a placeholder and we should use current datetime
                 update_dt = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
             
-            # Insert into Rankings table with SongFlag set to true (1 in SQLite)
+            # Insert into Rankings table with OriginalDataFlag set to true (1 in SQLite)
             cursor.execute('''
             INSERT INTO Rankings (
                 SubjectID, Rank, 
                 Driver1, Driver2, Driver3, Driver4, Driver5, 
                 Driver6, Driver7, Driver8, Driver9, Driver10, 
                 Driver11, Driver12, Driver13, Driver14, Driver15, 
-                Driver16, Driver17, UpdateDT, SongFlag
+                Driver16, Driver17, UpdateDT, OriginalDataFlag
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
                 subject_id, current_rank,
                 row['Driver1'], row['Driver2'], row['Driver3'], row['Driver4'], row['Driver5'],
                 row['Driver6'], row['Driver7'], row['Driver8'], row['Driver9'], row['Driver10'],
                 row['Driver11'], row['Driver12'], row['Driver13'], row['Driver14'], row['Driver15'],
-                row['Driver16'], row['Driver17'], update_dt, 1  # 1 means TRUE for SongFlag
+                row['Driver16'], row['Driver17'], update_dt, 1  # 1 means TRUE for OriginalDataFlag
             ))
     
     conn.commit()
     conn.close()
-    print(f"Database successfully seeded from {csv_path} to {db_path} with SongFlag set to TRUE")
+    print(f"Database successfully seeded from {csv_path} to {db_path} with OriginalDataFlag set to TRUE")
 
 if __name__ == "__main__":
     import argparse
