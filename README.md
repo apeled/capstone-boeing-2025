@@ -21,20 +21,6 @@ ranklab_env\Scripts\activate
 pip install dash dash-bootstrap-components plotly pandas rpy2 dash-ag-grid
 ```
 
-## 3️⃣ Install R Dependencies
-Open **R** and run:
-```
-install.packages("tidyverse")
-install.packages("caret")
-install.packages("MASS")
-install.packages("e1071")
-```
-
-## 4️⃣ Run the R Script to Train the Model
-```
-Rscript decision_rank_predict.R
-```
-
 ## 5️⃣ Run the Dash App
 ```
 python ranklab_dash_app.py
