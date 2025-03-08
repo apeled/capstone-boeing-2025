@@ -13,6 +13,7 @@ from sklearn.preprocessing import StandardScaler
 from typing import Dict, Tuple, List, Optional, Any, Union
 import sqlite3
 import datetime
+import random
 from data.seed_db import insert_into_rankings, load_sqlite_to_dataframe
 
 
@@ -834,10 +835,10 @@ rank_prediction_tab = dbc.Container([
                     "Predict Rank"
                 ], id="predict-btn", color="primary", size="lg", className="mt-3"),
                 dbc.Button([
-                    html.I(className="bi bi-arrow-counterclockwise me-2"),
-                    "Reset"
-                ], id="reset-btn", color="secondary", size="lg", className="mt-3 ms-2"),
-            ], className="d-flex justify-content-center mt-4"),
+                    html.I(className="bi bi-shuffle me-2"),
+                    "Randomize Factors"
+                ], id="randomize-btn", color="warning", size="lg", className="mt-3 ms-2"),
+            ], className="d-flex justify-content-center mt-4")
         ]),
     ], className="shadow-sm mb-4"),
     
@@ -1026,14 +1027,6 @@ about_me_tab = dbc.Container([
                         ]),
                     ], className="shadow-sm h-100"),
                 ], md=4, className="mb-3"),
-            ]),dbc.Col([
-                    dbc.Card([
-                        dbc.CardBody([
-                            html.H5("Dr. Song", className="card-title"),
-                            html.Img(src="/assets/song.png", height="250px"),
-                        ]),
-                    ], className="shadow-sm h-100"),
-                ], md=4, className="mb-10"),
             ]),
             
             html.Hr(),
@@ -1101,6 +1094,18 @@ app.layout = dbc.Container([
         ]),
     ], className="border-top pt-3"),
 ], fluid=True, className="px-4 py-3 bg-light min-vh-100")
+
+
+# Callback to reset the input dropdowns
+@app.callback(
+    [Output({"type": "factor-dropdown", "index": idx}, "value") for idx in range(len(driver_columns))],
+    Input("randomize-btn", "n_clicks"),
+    prevent_initial_call=True
+)
+def randomize_factors(n_clicks):
+    factor_options = [f"Factor{i}" for i in range(1, 18)]  # Factor1 to Factor17
+    shuffled_factors = random.sample(factor_options, len(factor_options))  # Ensure unique random values
+    return shuffled_factors  # Assign unique values to all dropdowns
 
 # Callback to show/hide datetime input
 @app.callback(
@@ -1241,7 +1246,6 @@ def toggle_new_subject_input(selected_subject):
         return {"display": "block"}
     return {"display": "none"}
 
-# Callback to update dropdown options based on already selected factors
 @app.callback(
     [Output({"type": "factor-dropdown", "index": ALL}, "options")],
     [Input({"type": "factor-dropdown", "index": ALL}, "value")],
@@ -1249,39 +1253,65 @@ def toggle_new_subject_input(selected_subject):
 )
 def update_dropdown_options(selected_values, dropdown_ids):
     """
-    Update dropdown options to hide factors that have already been selected
-    This enforces the constraint that each factor can only be used once
+    Update dropdown options to hide factors that have already been selected.
+    This ensures each factor can only be selected once across all dropdowns.
     """
-    ctx = callback_context
-    if not ctx.triggered or not all([isinstance(x, (list, tuple)) for x in [selected_values, dropdown_ids]]):
-        # Initialize with all options available
-        return [[{"label": factor, "value": factor} for factor in all_factors] for _ in dropdown_ids]
+    # List of all possible factors
+    all_factors = [f"Factor{i}" for i in range(1, 18)]
     
-    # Get all selected factors (excluding empty selections)
-    selected_factors = [v for v in selected_values if v]
+    # Get the set of selected values, ignoring None values
+    selected_values_set = set(filter(None, selected_values))
     
-    # Create list of dropdown options for each dropdown
-    all_options = []
-    for i, dropdown_id in enumerate(dropdown_ids):
-        current_value = selected_values[i] if i < len(selected_values) else ""
-        
-        # This dropdown's options should include all factors except those selected in other dropdowns
-        available_factors = all_factors.copy()
-        for j, value in enumerate(selected_values):
-            if value and j != i:  # Skip this dropdown's own value
-                if value in available_factors:
-                    available_factors.remove(value)
-        
-        # Always include the current selection in options (to prevent it from disappearing)
-        if current_value and current_value not in available_factors:
-            available_factors.append(current_value)
-            available_factors.sort()
-        
-        # Create options list for this dropdown
-        dropdown_options = [{"label": factor, "value": factor} for factor in available_factors]
-        all_options.append(dropdown_options)
+    # Generate updated options for each dropdown
+    updated_options = []
+    for dropdown_id, selected_value in zip(dropdown_ids, selected_values):
+        # Available options exclude the selected values from other dropdowns
+        available_options = [factor for factor in all_factors if factor not in selected_values_set or factor == selected_value]
+        updated_options.append([{"label": factor, "value": factor} for factor in available_options])
     
-    return [all_options]
+    return [updated_options]
+
+# # Callback to update dropdown options based on already selected factors
+# @app.callback(
+#     [Output({"type": "factor-dropdown", "index": ALL}, "options")],
+#     [Input({"type": "factor-dropdown", "index": ALL}, "value")],
+#     [State({"type": "factor-dropdown", "index": ALL}, "id")]
+# )
+# def update_dropdown_options(selected_values, dropdown_ids):
+#     """
+#     Update dropdown options to hide factors that have already been selected
+#     This enforces the constraint that each factor can only be used once
+#     """
+#     ctx = callback_context
+#     if not ctx.triggered or not all([isinstance(x, (list, tuple)) for x in [selected_values, dropdown_ids]]):
+#         # Initialize with all options available
+#         return [[{"label": factor, "value": factor} for factor in all_factors] for _ in dropdown_ids]
+    
+#     # Get all selected factors (excluding empty selections)
+#     selected_factors = [v for v in selected_values if v]
+    
+#     # Create list of dropdown options for each dropdown
+#     all_options = []
+#     for i, dropdown_id in enumerate(dropdown_ids):
+#         current_value = selected_values[i] if i < len(selected_values) else ""
+        
+#         # This dropdown's options should include all factors except those selected in other dropdowns
+#         available_factors = all_factors.copy()
+#         for j, value in enumerate(selected_values):
+#             if value and j != i:  # Skip this dropdown's own value
+#                 if value in available_factors:
+#                     available_factors.remove(value)
+        
+#         # Always include the current selection in options (to prevent it from disappearing)
+#         if current_value and current_value not in available_factors:
+#             available_factors.append(current_value)
+#             available_factors.sort()
+        
+#         # Create options list for this dropdown
+#         dropdown_options = [{"label": factor, "value": factor} for factor in available_factors]
+#         all_options.append(dropdown_options)
+    
+#     return [all_options]
 
 # Callback for prediction & visualization
 @app.callback(
@@ -1307,6 +1337,10 @@ def predict_rank(n_clicks, factor_values, selected_model, subject_id, new_subjec
     """Make predictions based on user input and selected model"""
     global df
     print(f"Date: {date_picker}")
+    if selected_model != "None":
+        filtered_df = df[df['Model'] == selected_model] # or model is blank... from sql table
+    else:
+        filtered_df = df
 
     if not n_clicks:
         return "No prediction yet", "", {}, 'Dummy signal for second callback'
@@ -1322,7 +1356,7 @@ def predict_rank(n_clicks, factor_values, selected_model, subject_id, new_subjec
     # Get subject history if available
     subject_history = None
     if used_subject_id and used_subject_id != "new_subject":
-        subject_history = get_subject_history(used_subject_id, df)
+        subject_history = get_subject_history(used_subject_id, filtered_df)
         if subject_history:
             print(f"Found history for Subject {used_subject_id}: Previous Rank = {subject_history['previous_rank']}")
     
@@ -1593,16 +1627,6 @@ def predict_rank(n_clicks, factor_values, selected_model, subject_id, new_subjec
         import traceback
         traceback.print_exc()
         return "Error", "Could not generate prediction. Check logs for details.", {}, 'Dummy signal for second callback'
-
-# Callback to reset the input dropdowns
-@app.callback(
-    [Output({"type": "factor-dropdown", "index": idx}, "value") for idx in range(len(driver_columns))],
-    Input("reset-btn", "n_clicks"),
-    prevent_initial_call=True
-)
-def reset_input(n_clicks):
-    """Reset all factor dropdowns to empty values"""
-    return [""] * len(driver_columns)
 
 # Expose the server for Gunicorn to run
 server = app.server
