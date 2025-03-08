@@ -15,6 +15,7 @@ import sqlite3
 import datetime
 import random
 from data.seed_db import insert_into_rankings, load_sqlite_to_dataframe
+import plotly.graph_objects as go
 
 
 # Define paths according to your repository structure
@@ -676,11 +677,13 @@ subject_id_selector = html.Div([
     ], id="new-subject-container", style={"display": "none"}),
 ])
 
+import plotly.graph_objects as go
+import plotly.express as px
 
 # Function to create a history chart for a subject
 def create_subject_history_chart(subject_id, reference_df):
     """
-    Create a line chart showing the rank history of a subject
+    Create a line chart showing the rank history of a subject, with separate traces for each model and historical data
     
     Args:
         subject_id: The subject ID to look up
@@ -690,13 +693,13 @@ def create_subject_history_chart(subject_id, reference_df):
         Plotly figure showing rank history
     """
     if reference_df.empty or 'SubjectID' not in reference_df.columns:
-        return px.line(title="No history data available")
+        return go.Figure(data=[go.Scatter(x=[], y=[], mode='lines', name="No history data available")])
     
     # Filter for this subject
     subject_data = reference_df[reference_df['SubjectID'] == subject_id]
     
     if subject_data.empty or 'Rank' not in subject_data.columns:
-        return px.line(title="No rank history available for this subject")
+        return go.Figure(data=[go.Scatter(x=[], y=[], mode='lines', name="No rank history available for this subject")])
     
     # Ensure we have dates
     if 'UpdateDT' in subject_data.columns:
@@ -704,32 +707,67 @@ def create_subject_history_chart(subject_id, reference_df):
             # Sort by date
             subject_data = subject_data.sort_values('UpdateDT')
             
-            # Create line chart
-            fig = px.line(
-                subject_data, 
-                x='UpdateDT', 
-                y='Rank',
-                markers=True,
-                title=f"Rank History for Subject {subject_id}",
-                labels={"UpdateDT": "Date", "Rank": "Rank"}
-            )
+            # Create a list to store traces
+            traces = []
+            
+            # Add the Historical Data trace for rows with empty 'Model' value
+            historical_data = subject_data[subject_data['Model'].isna()]
+            if not historical_data.empty:
+                historical_trace = go.Scatter(
+                    x=historical_data['UpdateDT'],
+                    y=historical_data['Rank'],
+                    mode='lines+markers',
+                    name="Historical Data",
+                    line=dict(color='gray'),  # A neutral color for historical data
+                    marker=dict(symbol='circle')
+                )
+                traces.append(historical_trace)
+            
+            # Use a color scale to ensure distinct colors
+            color_scale = px.colors.qualitative.Set1  # Set1 provides distinct colors
+            
+            # Loop through all unique model values (excluding NaN) and create a trace for each
+            for i, model in enumerate(subject_data['Model'].dropna().unique()):
+                model_data = subject_data[subject_data['Model'] == model]
+                
+                # Assign a color from the color scale
+                model_color = color_scale[i % len(color_scale)]
+                
+                # Add a trace for the current model
+                model_trace = go.Scatter(
+                    x=model_data['UpdateDT'],
+                    y=model_data['Rank'],
+                    mode='lines+markers',
+                    name=f"Model: {model}",
+                    line=dict(color=model_color),
+                    marker=dict(symbol='diamond')
+                )
+                traces.append(model_trace)
+            
+            # Create the figure with all traces
+            fig = go.Figure(data=traces)
             
             # Invert y-axis so that higher ranks (lower numbers) are at the top
             fig.update_layout(
                 yaxis_autorange="reversed",
                 plot_bgcolor='rgba(0,0,0,0)',
                 margin=dict(l=10, r=10, t=40, b=10),
-                height=200
+                height=200,
+                title=f"Rank History for Subject {subject_id}",
+                xaxis_title="Date",
+                yaxis_title="Rank"
             )
             
             return fig
             
         except Exception as e:
             print(f"Error creating history chart: {str(e)}")
-            return px.line(title=f"Error creating chart: {str(e)}")
+            return go.Figure(data=[go.Scatter(x=[], y=[], mode='lines', name=f"Error: {str(e)}")])
     else:
         # No date column
-        return px.line(title="Cannot create history chart: missing date information")
+        return go.Figure(data=[go.Scatter(x=[], y=[], mode='lines', name="Cannot create history chart: missing date information")])
+
+
     
 # Create improved factor selection interface
 def create_factor_selectors():
@@ -776,7 +814,7 @@ rank_prediction_tab = dbc.Container([
                     subject_id_selector,
                     dbc.Checkbox(
                         id="toggle-checkbox",
-                        label="Show Date and Time Input",
+                        label="Show Date and Time Input (Store in Database)",
                         className="mb-2"
                     ),
                     date_time_ui
@@ -1231,7 +1269,7 @@ def update_subject_history(selected_subject, selected_model, dummy_output):
     ]
     
     # Create history chart
-    history_chart = create_subject_history_chart(selected_subject, filtered_df)
+    history_chart = create_subject_history_chart(selected_subject, df)
     
     return {"display": "block"}, content, history_chart
 
