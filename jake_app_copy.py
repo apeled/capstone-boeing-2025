@@ -1065,6 +1065,14 @@ about_me_tab = dbc.Container([
                         ]),
                     ], className="shadow-sm h-100"),
                 ], md=4, className="mb-3"),
+                 dbc.Col([
+                    dbc.Card([
+                        dbc.CardBody([
+                            html.H5("Dr Song", className="card-title"),
+                            html.Img(src="/assets/song.png", height="250px"),
+                        ]),
+                    ], className="shadow-sm h-100"),
+                ], md=4, className="mb-3")
             ]),
             
             html.Hr(),
