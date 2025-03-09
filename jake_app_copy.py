@@ -14,7 +14,7 @@ from typing import Dict, Tuple, List, Optional, Any, Union
 import sqlite3
 import datetime
 import random
-from data.seed_db import insert_into_rankings, load_sqlite_to_dataframe
+from seed_db import insert_into_rankings, load_sqlite_to_dataframe
 
 
 # Define paths according to your repository structure
@@ -1334,53 +1334,14 @@ def update_dropdown_options(selected_values, dropdown_ids):
     prevent_initial_call=True
 )
 def predict_rank(n_clicks, factor_values, selected_model, subject_id, new_subject_id, date_picker, time_input, toggle_checkbox):
-    """Make predictions based on user input and selected model"""
+    """Make predictions based on user input and selected model using position-based encoding"""
     global df
-    print(f"Date: {date_picker}")
-    if selected_model != "None":
-        filtered_df = df[df['Model'] == selected_model] # or model is blank... from sql table
-    else:
-        filtered_df = df
-
+    
     if not n_clicks:
         return "No prediction yet", "", {}, 'Dummy signal for second callback'
     
-    # Debug info
-    print(f"Prediction requested for model: {selected_model}")
-    print(f"Subject ID: {subject_id} (New: {new_subject_id})")
-    print(f"Factor values: {factor_values}")
-    
     # Determine actual subject ID to use
     used_subject_id = new_subject_id if subject_id == "new_subject" and new_subject_id else subject_id
-    
-    # Get subject history if available
-    subject_history = None
-    if used_subject_id and used_subject_id != "new_subject":
-        subject_history = get_subject_history(used_subject_id, filtered_df)
-        if subject_history:
-            print(f"Found history for Subject {used_subject_id}: Previous Rank = {subject_history['previous_rank']}")
-    
-    # Create input dataframe from factor values
-    input_data = {}
-    for i, col in enumerate(driver_columns):
-        if i < len(factor_values):
-            factor_value = factor_values[i] if factor_values[i] else ""
-        else:
-            factor_value = ""
-        input_data[col] = [factor_value]
-    
-    # Add subject ID
-    input_data["SubjectID"] = [used_subject_id]
-    
-    # If we have subject history, add previous rank
-    if subject_history and subject_history['previous_rank'] is not None:
-        input_data["PrevRank"] = [subject_history['previous_rank']]
-    
-    # Convert to DataFrame
-    df_new = pd.DataFrame(input_data)
-    print(f"Created input DataFrame: {df_new.shape}")
-    print(f"Input data: {df_new.to_dict(orient='records')}")
-    df_new.to_csv('test1.csv')
     
     # Check if we have any factors selected
     has_factors = any(v for v in factor_values if v)
@@ -1389,239 +1350,82 @@ def predict_rank(n_clicks, factor_values, selected_model, subject_id, new_subjec
         return "No prediction", "Please select at least one driver factor", {}, 'Dummy signal for second callback'
     
     try:
-        # Ensure we have a model to use
+        # Load the model
         model_path = available_models.get(selected_model, "")
-        
         if not model_path:
             return "Model error", f"Model {selected_model} not found", {}, 'Dummy signal for second callback'
         
-        # Load the model
-        print(f"Loading model from {model_path}")
         model = load_model(model_path)
-        
         if model is None:
             return "Model error", "Could not load model", {}, 'Dummy signal for second callback'
         
-        print(f"Successfully loaded model: {type(model).__name__}")
+        # Create position-based features
+        input_data = {}
         
-        # Try different approaches to make a prediction
-        approach_used = "unknown"
-        predicted_rank_value = None
-        X_pred = None  # Store the prediction DataFrame for feature importance
+        # Add core features
+        input_data['DaysSinceFirst'] = [0]
+        input_data['DaysSincePrev'] = [10]
+        input_data['PrevRank'] = [100]
         
-        # APPROACH 1: Try using feature columns file (most reliable)
-        try:
-            print("Attempting prediction using feature columns file")
-            feature_columns_path = os.path.join(MODEL_PATH, "feature_columns.pkl")
+        # Add Factor*_Position features based on selected factors
+        for factor_value in all_factors:
+            # Find if this factor is selected and at which position
+            position = -1
+            for i, selected_factor in enumerate(factor_values):
+                if selected_factor == factor_value:
+                    position = i + 1  # 1-based position
+                    break
             
-            if os.path.exists(feature_columns_path):
-                with open(feature_columns_path, 'rb') as f:
-                    feature_columns = pickle.load(f)
-                    
-                print(f"Loaded {len(feature_columns)} feature columns")
-                
-                # Create one-hot encoding for all driver columns
-                encoded_df = pd.get_dummies(df_new, columns=driver_columns, prefix=driver_columns)
-                
-                # Create a DataFrame with all needed columns, filled with 0's
-                X_pred = pd.DataFrame(0, index=[0], columns=feature_columns)
-                
-                # Update with values from our encoded input data
-                for col in encoded_df.columns:
-                    if col in X_pred.columns:
-                        X_pred[col] = encoded_df[col].values
-                
-                print(f"Prediction data shape: {X_pred.shape}")
-                
-                # Make prediction using our helper function
-                predicted_rank = make_prediction_with_model(model, X_pred)
-                predicted_rank_value = int(round(predicted_rank[0]))
-                print(f"Predicted rank: {predicted_rank_value}")
-                
-                approach_used = "feature columns"
-            else:
-                raise ValueError("Feature columns file not found")
-                
-        except Exception as e1:
-            print(f"Feature columns approach failed: {str(e1)}")
-            
-            # APPROACH 2: Try to use model.feature_names_in_ if available
-            try:
-                print("Trying model.feature_names_in_ approach")
-                
-                # Create one-hot encoding
-                encoded_df = pd.get_dummies(df_new, columns=driver_columns, prefix=driver_columns)
-                
-                # Check if the model (or a model inside a dict) has feature_names_in_
-                feature_names = None
-                
-                if hasattr(model, 'feature_names_in_'):
-                    feature_names = model.feature_names_in_
-                elif isinstance(model, dict):
-                    # Look through the dictionary for an object with feature_names_in_
-                    for key, value in model.items():
-                        if hasattr(value, 'feature_names_in_'):
-                            feature_names = value.feature_names_in_
-                            break
-                
-                if feature_names is not None:
-                    print(f"Found {len(feature_names)} feature names in model")
-                    
-                    # Create DataFrame with zeros for all expected features
-                    X_pred = pd.DataFrame(0, index=[0], columns=feature_names)
-                    
-                    # Update with values we have
-                    for col in encoded_df.columns:
-                        if col in X_pred.columns:
-                            X_pred[col] = encoded_df[col].values
-                            
-                    # Make prediction
-                    predicted_rank = make_prediction_with_model(model, X_pred)
-                    X_pred.to_csv("test.csv")
-                    predicted_rank_value = int(round(predicted_rank[0]))
-                    print(f"Predicted rank: {predicted_rank_value}")
-                    
-                    approach_used = "model features"
-                else:
-                    raise ValueError("Model doesn't have feature_names_in_ attribute")
-                    
-            except Exception as e2:
-                print(f"Model features approach failed: {str(e2)}")
-                
-                # APPROACH 3: Let's try to directly extract the model from saved files
-                try:
-                    print("Trying to directly load the actual model file")
-                    # Check which model file we should use
-                    model_filename = None
-                    
-                    for _, row in model_summary.iterrows():
-                        if row['model_name'] == selected_model:
-                            model_filename = row['filename']
-                            break
-                    
-                    if not model_filename:
-                        model_filename = f"{selected_model.lower().replace(' ', '_')}.pkl"
-                    
-                    # Try to load the model directly
-                    direct_model_path = os.path.join(MODEL_PATH, model_filename)
-                    print(f"Looking for model at: {direct_model_path}")
-                    
-                    if os.path.exists(direct_model_path):
-                        with open(direct_model_path, 'rb') as f:
-                            direct_model = pickle.load(f)
-                        
-                        print(f"Loaded direct model of type: {type(direct_model).__name__}")
-                        
-                        # Create input features using simple encoding
-                        X_pred = pd.get_dummies(df_new, columns=driver_columns, prefix=driver_columns)
-                        
-                        # Try to predict
-                        predicted_rank = make_prediction_with_model(direct_model, X_pred)
-                        predicted_rank_value = int(round(predicted_rank[0]))
-                        print(f"Predicted rank: {predicted_rank_value}")
-                        
-                        # Update our model reference for feature importance
-                        model = direct_model
-                        approach_used = "direct model"
-                    else:
-                        raise ValueError(f"Direct model file not found: {direct_model_path}")
-                        
-                except Exception as e3:
-                    print(f"Direct model approach failed: {str(e3)}")
-                    
-                    # APPROACH 4: Last resort - manually extract and use raw predictions if possible
-                    try:
-                        print("Attempting to use raw predictions from model")
-                        
-                        # Create a basic input representation for feature importance
-                        X_pred = pd.get_dummies(df_new, columns=driver_columns, prefix=driver_columns)
-                        
-                        # If model is a dictionary with raw prediction values
-                        if isinstance(model, dict) and 'raw_predictions' in model:
-                            raw_preds = model['raw_predictions']
-                            if isinstance(raw_preds, np.ndarray):
-                                predicted_rank = np.mean(raw_preds)
-                                predicted_rank_value = int(round(predicted_rank))
-                                print(f"Used raw predictions, got rank: {predicted_rank_value}")
-                                approach_used = "raw predictions"
-                            else:
-                                raise ValueError("Raw predictions not in expected format")
-                        
-                        # If the model dictionary has precomputed values
-                        elif isinstance(model, dict) and 'ranks' in model:
-                            # Just use the first rank from the precomputed values
-                            ranks = model['ranks']
-                            if isinstance(ranks, (list, np.ndarray)) and len(ranks) > 0:
-                                predicted_rank_value = int(ranks[0])
-                                print(f"Used precomputed rank: {predicted_rank_value}")
-                                approach_used = "precomputed values"
-                            else:
-                                raise ValueError("Precomputed ranks not available")
-                        else:
-                            raise ValueError("No raw predictions or precomputed values found")
-                        
-                    except Exception as e4:
-                        print(f"All approaches failed:\n1: {str(e1)}\n2: {str(e2)}\n3: {str(e3)}\n4: {str(e4)}")
-                        return "Error", "All prediction approaches failed", {}, 'Dummy signal for second callback'
+            # Add feature (use 0 if not selected, otherwise use the position)
+            feature_name = f"{factor_value}_Position"
+            input_data[feature_name] = [position if position > 0 else 0]
         
-        # If we don't have a prediction by now, return an error
-        if predicted_rank_value is None:
-            return "Error", "Could not generate a prediction", {}, 'Dummy signal for second callback'
-            
-        # Get confidence/info text
+        # Convert to DataFrame with no specific order yet
+        X_pred_raw = pd.DataFrame(input_data)
+        
+        # Get the model's feature order directly from the error message
+        model_feature_order = ['DaysSinceFirst', 'DaysSincePrev', 'PrevRank', 
+                              'Factor12_Position', 'Factor6_Position', 'Factor4_Position', 
+                              'Factor8_Position', 'Factor2_Position', 'Factor16_Position', 
+                              'Factor15_Position', 'Factor5_Position', 'Factor3_Position', 
+                              'Factor10_Position', 'Factor9_Position', 'Factor13_Position', 
+                              'Factor17_Position', 'Factor14_Position', 'Factor1_Position', 
+                              'Factor11_Position', 'Factor7_Position']
+        
+        # Create a new DataFrame with exactly the model's expected column order
+        X_pred = pd.DataFrame()
+        for feature in model_feature_order:
+            X_pred[feature] = X_pred_raw[feature]
+        
+        # Make prediction
+        predicted_rank = make_prediction_with_model(model, X_pred)
+        predicted_rank_value = int(round(predicted_rank[0]))
+        
+        # Get confidence text
         model_row = model_summary[model_summary['model_name'] == selected_model]
         if not model_row.empty:
             info = model_row.iloc[0]
             confidence_text = (f"Expected accuracy: ±{info['mae']:.1f} ranks | "
-                              f"Within 10 ranks: {info['accuracy_10']*100:.1f}% "
-                              f"(using {approach_used})")
+                              f"Within 10 ranks: {info['accuracy_10']*100:.1f}%")
         else:
-            # Count factors used for general info
             factors_used = sum(1 for v in factor_values if v)
-            confidence_text = f"Prediction based on {factors_used} factors (using {approach_used})"
+            confidence_text = f"Prediction based on {factors_used} factors"
         
-        # Create feature importance plot instead of factor distribution
+        # Create feature importance chart
         selected_factors = [v for v in factor_values if v]
+        importance_fig = create_importance_chart(model, X_pred, selected_factors, "position-based")
         
-        if X_pred is not None:
-            # Create importance chart
-            importance_fig = create_importance_chart(model, X_pred, selected_factors, approach_used)
-
-            if toggle_checkbox:
-                conn = sqlite3.connect(DATA_PATH)
-                # Query specific columns for the first row and convert to a list
-                values_list = df.loc[0, [f"Driver{i}" for i in range(1, 18)]].tolist()
-                insert_into_rankings(conn, used_subject_id, predicted_rank_value, values_list, f"{date_picker} {time_input}:00", False, selected_model)
-                conn.close()
-                df = load_sqlite_to_dataframe(DATA_PATH)
-                df['UpdateDT'] = pd.to_datetime(df['UpdateDT'])
-                conn.close()
-            
-            return f"Rank: {predicted_rank_value}", confidence_text, importance_fig, 'Dummy signal for second callback'
-        else:
-            # Fallback if we don't have prediction data
-            fig = px.bar(
-                x=selected_factors,
-                y=[1] * len(selected_factors),
-                labels={"x": "Selected Factors", "y": "Count"},
-                title="Feature importance not available"
-            )
-
-
-            X_pred.to_csv("test.csv")
-
-            if toggle_checkbox:
-                conn = sqlite3.connect(DATA_PATH)
-                # Query specific columns for the first row and convert to a list
-                values_list = df.loc[0, [f"Driver{i}" for i in range(1, 18)]].tolist()
-                insert_into_rankings(conn, used_subject_id, predicted_rank_value, values_list, f"{date_picker} {time_input}:00", False, selected_model)
-                conn.close()
-                df = load_sqlite_to_dataframe(DATA_PATH)
-                df['UpdateDT'] = pd.to_datetime(df['UpdateDT'])
-                conn.close()
-
-            return f"Rank: {predicted_rank_value}", confidence_text, fig, 'Dummy signal for second callback'
-
+        # Save to database if toggle is checked
+        if toggle_checkbox:
+            conn = sqlite3.connect(DATA_PATH)
+            values_list = df.loc[0, [f"Driver{i}" for i in range(1, 18)]].tolist()
+            insert_into_rankings(conn, used_subject_id, predicted_rank_value, values_list, f"{date_picker} {time_input}:00", False, selected_model)
+            conn.close()
+            df = load_sqlite_to_dataframe(DATA_PATH)
+            df['UpdateDT'] = pd.to_datetime(df['UpdateDT'])
+        
+        return f"Rank: {predicted_rank_value}", confidence_text, importance_fig, 'Dummy signal for second callback'
+        
     except Exception as e:
         print(f"Error during prediction: {str(e)}")
         import traceback
