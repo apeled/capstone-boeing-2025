@@ -42,7 +42,7 @@ def create_table(conn):
             UpdateDT TEXT,
             OriginalDataFlag BOOLEAN,
             Model TEXT,
-            PRIMARY KEY (SubjectID, UpdateDT)
+            PRIMARY KEY (SubjectID, UpdateDT, Model)
         )
     ''')
     conn.commit()
