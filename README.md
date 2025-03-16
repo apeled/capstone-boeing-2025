@@ -2,7 +2,7 @@
 
 RankLab is a dynamic risk-ranking system that uses ensemble machine learning techniques to predict rankings based on multiple time-varying criteria. This tool helps stakeholders proactively manage supplier risks and optimize decision-making processes.
 
-![RankLab](assets/images/ranklab_dashboard.png)
+![RankLab](assets/ranklab_dashboard.png)
 
 ## Project Overview
 
