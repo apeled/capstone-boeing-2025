@@ -105,3 +105,7 @@ To compare predictions across different models:
 The comparison view helps you understand:
 - Which models predict similar rankings
 - The range of possible rankings
+
+In addition, model performance can be compared by clicking the "Model Information" tab. In this tab, users can view the performance metrics of the selected model, which includes error metrics, correlation metrics, and accuracy metrics. This tab also includes a description of the model and features used during training.
+
+![Model Performance](../assets/model_performance_example.png)
