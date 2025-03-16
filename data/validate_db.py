@@ -254,14 +254,4 @@ def run_validation(db_file, csv_file=None):
 if __name__ == "__main__":
     DB_FILE = "rankings.db"
     CSV_FILE = "Rank.csv"
-    
-    # Allow command-line arguments to override defaults
-    if len(sys.argv) > 1:
-        DB_FILE = sys.argv[1]
-    if len(sys.argv) > 2:
-        CSV_FILE = sys.argv[2]
-    
     validation_passed = run_validation(DB_FILE, CSV_FILE)
-    
-    # Set exit code based on validation result
-    sys.exit(0 if validation_passed else 1)
