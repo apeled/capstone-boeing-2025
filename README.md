@@ -30,6 +30,7 @@ capstone-boeing-2025/
 ├── docs/                 # Documentation files
 │   ├── Project Proposal.pdf
 │   ├── Final Poster.pdf
+│   ├── user_guide.md
 │   └── App Demo.mp4      # Screen recording of app usage
 ├── models/               # Saved model files and model testing
 │   ├── mcda-rank-prediction.ipynb
