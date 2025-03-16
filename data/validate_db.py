@@ -3,6 +3,7 @@ SQLite Database Validation Script
 
 This script validates the structure and content of the SQLite database created by the seed_db.py module.
 It performs the following checks:
+
 - Verifies the database file exists
 - Validates the table structure matches the expected schema
 - Checks for data integrity (missing values, duplicates, invalid formats)
