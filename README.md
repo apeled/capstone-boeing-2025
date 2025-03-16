@@ -132,7 +132,7 @@ The SQLite database (`data/rankings.db`) stores both historical data and new pre
 
 ## Deployment Note
 
-While this guide focuses on local setup and execution, the full RankLab application has also been deployed to a production environment using Docker containers, Gunicorn WSGI server, and Amazon Web Services (S3 and EC2).
+While this guide focuses on local setup and execution, the full RankLab application has also been deployed to a production environment using Docker containers, Gunicorn WSGI server, and Amazon Web Services (S3 and EC2). Open your web browser and go to `http://3.90.69.124:8050/` to access the dashboard. It is important to note that this URL will no longer be active following the conclusion of the MSDS Capstone Fair.
 
 ## License
 
