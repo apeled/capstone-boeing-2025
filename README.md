@@ -130,9 +130,7 @@ The SQLite database (`data/rankings.db`) stores both historical data and new pre
 - Database tests in `tests/seed_db_test.py` ensure data integrity.
 - Model testing is integrated into the `models/` directory.
 
-# AWS EC2 Deployment Guide
-
-This guide provides the basic steps for deploying the RankLab application on an Amazon EC2 instance.
+## AWS Deployment
 
 ## Step 1: Launch an EC2 Instance
 
