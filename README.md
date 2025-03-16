@@ -30,6 +30,7 @@ capstone-boeing-2025/
 ├── docs/                 # Documentation files
 │   ├── Project Proposal.pdf
 │   ├── Final Poster.pdf
+│   ├── RankLab Cloud Architecture.pdf
 │   └── user_guide.md     
 ├── models/               # Saved model files and model testing
 │   ├── mcda-rank-prediction.ipynb
