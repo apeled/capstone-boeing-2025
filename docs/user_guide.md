@@ -67,7 +67,7 @@ To generate new rank predictions:
 
 ![Prediction Inputs](../assets/prediction_inputs.png)
 
-3. Click the "Predict" button
+3. Click the "Predict Rank" button
 4. View the predicted rank in the Prediction Result area
 
 ### 5. Understanding Prediction Results
