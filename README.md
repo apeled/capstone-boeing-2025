@@ -130,9 +130,120 @@ The SQLite database (`data/rankings.db`) stores both historical data and new pre
 - Database tests in `tests/seed_db_test.py` ensure data integrity.
 - Model testing is integrated into the `models/` directory.
 
-## Deployment Note
+# AWS EC2 Deployment Guide
 
-While this guide focuses on local setup and execution, the full RankLab application has also been deployed to a production environment using Docker containers, Gunicorn WSGI server, and Amazon Web Services (S3 and EC2). Open your web browser and go to `http://3.90.69.124:8050/` to access the dashboard. It is important to note that this URL will no longer be active following the conclusion of the MSDS Capstone Fair.
+This guide provides the basic steps for deploying the RankLab application on an Amazon EC2 instance.
+
+## Step 1: Launch an EC2 Instance
+
+1. Sign in to the AWS Management Console
+2. Navigate to the EC2 Dashboard
+3. Click "Launch Instance"
+4. Choose Ubuntu Server as the AMI
+5. Select an instance type (t2.micro is free tier eligible)
+6. Configure security group:
+   - Allow SSH (port 22) from your IP
+   - Allow Custom TCP on port 8050 from anywhere (0.0.0.0/0)
+7. Launch the instance and download the key pair (.pem file)
+
+## Step 2: Connect to Your EC2 Instance
+
+For Mac/Linux:
+```bash
+chmod 400 your-key.pem
+ssh -i your-key.pem ubuntu@your-instance-public-ip
+```
+
+For Windows (using PuTTY or Windows Terminal):
+- Convert .pem to .ppk with PuTTYgen if using PuTTY
+- Connect using the key and your instance's public IP
+
+## Step 3: Set Up the Environment
+
+```bash
+# Update package lists
+sudo apt-get update
+
+# Install Python and development tools
+sudo apt-get install -y python3-pip python3-dev build-essential git
+
+# Clone your repository
+git clone https://github.com/your-username/your-repository.git
+cd your-repository
+
+# Create and activate virtual environment
+python3 -m venv venv
+source venv/bin/activate
+
+# Install required packages
+pip install -r requirements.txt
+```
+
+## Step 4: Run the Application with Gunicorn
+
+```bash
+# Start the application with nohup to keep it running after you disconnect
+nohup gunicorn -b 0.0.0.0:8050 app:server &
+
+# To check if it's running
+ps aux | grep gunicorn
+
+# To view the application logs
+cat nohup.out
+```
+
+## Step 5: Access the Application
+
+Open your web browser and navigate to:
+```
+http://your-instance-public-ip:8050
+```
+
+## Troubleshooting
+
+### If the application isn't accessible:
+1. Check security group settings in AWS console
+2. Verify the application is running: `ps aux | grep gunicorn`
+3. Check application logs: `cat nohup.out`
+
+### If you need to stop the application:
+```bash
+pkill gunicorn
+# OR
+kill -9 <PID>
+```
+
+### If you're out of disk space:
+```bash
+# Check disk usage
+df -h
+
+# Increase EBS volume size in AWS Console, then:
+sudo growpart /dev/xvda 1
+sudo resize2fs /dev/xvda1
+```
+
+### Missing Python modules:
+```bash
+# Ensure you're in your virtual environment
+source venv/bin/activate
+
+# Install any missing modules
+pip install module_name
+```
+
+### To update your application:
+```bash
+# Pull latest changes
+git pull
+
+# Restart the application
+pkill gunicorn
+nohup gunicorn -b 0.0.0.0:8050 app:server &
+```
+
+## Note:
+The deployment URL (http://your-instance-public-ip:8050) will be active until the EC2 instance is terminated. For the RankLab application, visit `http://3.90.69.124:8050/` to access the dashboard.
 
 ## License
 
