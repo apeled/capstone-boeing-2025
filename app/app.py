@@ -974,6 +974,7 @@ app = dash.Dash(
         dbc_css,
         "/assets/dbc.css"
     ],
+    assets_folder='assets',
     suppress_callback_exceptions=True
 )
 app.title = "RankLab: Rank Prediction Tool"
