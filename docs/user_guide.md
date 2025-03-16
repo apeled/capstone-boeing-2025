@@ -87,7 +87,7 @@ To save your predictions and display predictions within the Rank History graph:
 2. Enter the date and timestamp that you would like to use for forecasting
 3. Click "Predict Rank"
 
-![Save Prediction](../assets/images/save_prediction.png)
+![Save Prediction](../assets/save_prediction.png)
 
 Saved predictions will be stored in the database and can be accessed later upon selecting a subject from the "Select Subject ID" dropdown.
 
@@ -106,6 +106,6 @@ The comparison view helps you understand:
 - Which models predict similar rankings
 - The range of possible rankings
 
-In addition, model performance can be compared by clicking the "Model Information" tab. In this tab, users can view the performance metrics of the selected model, which includes error metrics, correlation metrics, and accuracy metrics. This tab also includes a description of the model and features used during training.
+In addition, model performance can be compared by clicking the "Model Information" tab. In this tab, users can view the performance metrics of the selected model, which includes error metrics, correlation metrics, and accuracy metrics. This tab also includes a description of the model and features used during training. An example using Random Forest is shown below.
 
 ![Model Performance](../assets/model_performance_example.png)
