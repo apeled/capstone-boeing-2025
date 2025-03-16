@@ -2,6 +2,10 @@
 
 This guide provides instructions on how to use the RankLab dashboard, whether you're accessing it locally or through the AWS deployment. A [screen recording](https://drive.google.com/file/d/1a8QUuOYbD_F4lETYktZ9tXeUtngpKZq9/view?usp=sharing) that demonstrates using the application can also be found on our Google Drive.
 
+## Dashboard Access
+
+After local installation following the instructions from `README.md`, open your web browser and go to `http://127.0.0.1:8050/` to access the dashboard. Alternatively, if using the AWS deployment, open your web browser and go to `http://3.90.69.124:8050/` to access the dashboard. It is important to note that this URL will no longer be active following the conclusion of the MSDS Capstone Fair.
+
 ## Dashboard Overview
 
 The RankLab dashboard consists of several sections that help you analyze and predict rankings based on multiple criteria. Here's a breakdown of the main components:
