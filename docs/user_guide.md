@@ -62,7 +62,7 @@ To generate new rank predictions:
 
 1. Scroll to the "Input Decision Factors" section
 2. Input values for each of the 17 decision-making factors:
-   - Use the sliders or input boxes to set values
+   - Use the dropdowns to set values
    - Driver1 represents the driver having the largest influence on Rank, and Driver17 represents the driver having the smallest influence on Rank.
 
 ![Prediction Inputs](../assets/prediction_inputs.png)
