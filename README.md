@@ -6,7 +6,7 @@ RankLab is a dynamic risk-ranking system that uses ensemble machine learning tec
 
 ## Project Overview
 
-RankLab addresses the need for nuanced Multi-Criteria Decision Analysis (MCDA) by refining and deploying a dynamic risk ranking system using an ensemble of machine learning techniques. The system analyzes patterns in rank fluctuations across performance criteria to predict future rankings. For additional project work and the complete project plan, visit this [Google Drive](https://drive.google.com/drive/folders/16ztBnDYcFYFvIZCSEksDtsQ0AAZStirj?usp=sharing).
+RankLab addresses the need for nuanced Multi-Criteria Decision Analysis (MCDA) by refining and deploying a dynamic risk ranking system using an ensemble of machine learning techniques. The system analyzes patterns in rank fluctuations across performance criteria to predict future rankings. For additional project work and the [complete project plan](https://docs.google.com/spreadsheets/d/15JWSLvFADyQ4BJYCcOFMrr5NmEh6Ry9Sy5_v7HUJQiw/edit?usp=sharing), visit this [Google Drive](https://drive.google.com/drive/folders/16ztBnDYcFYFvIZCSEksDtsQ0AAZStirj?usp=sharing). A [screen recording](https://drive.google.com/file/d/1a8QUuOYbD_F4lETYktZ9tXeUtngpKZq9/view?usp=sharing) that demonstrates using the application can also be found on our Google Drive.
 
 Key features:
 - Multi-model tracking for concurrent visualization of prediction models
@@ -30,8 +30,7 @@ capstone-boeing-2025/
 ├── docs/                 # Documentation files
 │   ├── Project Proposal.pdf
 │   ├── Final Poster.pdf
-│   ├── user_guide.md
-│   └── App Demo.mp4      # Screen recording of app usage
+│   └── user_guide.md     
 ├── models/               # Saved model files and model testing
 │   ├── mcda-rank-prediction.ipynb
 │   └── enhanced-rank-prediction.ipynb

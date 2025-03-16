@@ -1,6 +1,6 @@
 # RankLab Dashboard User Guide
 
-This guide provides instructions on how to use the RankLab dashboard, whether you're accessing it locally or through the AWS deployment.
+This guide provides instructions on how to use the RankLab dashboard, whether you're accessing it locally or through the AWS deployment. A [screen recording](https://drive.google.com/file/d/1a8QUuOYbD_F4lETYktZ9tXeUtngpKZq9/view?usp=sharing) that demonstrates using the application can also be found on our Google Drive.
 
 ## Dashboard Overview
 
