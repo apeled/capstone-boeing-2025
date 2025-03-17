@@ -60,6 +60,7 @@ This setup facilitates a comprehensive understanding of MCDA rank prediction mod
 ├── model_summary_enhanced_combined.csv
 ├── positional_models_notebook.ipynb
 ├── random_forest_enhanced.pkl
+├── requirements.txt
 ├── xgboost_enhanced.pkl
 ├── saved_models_mcda_model_rank_prediction
     ├── best_rank_prediction_model.pkl
