@@ -65,7 +65,7 @@ This folder contains resources and analyses focused on predicting positional ran
   - Gradient Boosting, LightGBM, Random Forest, and XGBoost models trained using enhanced positional features and PCA transformations.
 
 - **`saved_models_mcda_prediction` folder**:
-  - Contains the best-performing model (`best_rank_prediction_model.pkl`) and additional trained models based on different feature sets (one-hot, PCA, positional).
+  - Contains the trained models based on different feature sets (one-hot, PCA, positional).
   - Feature metadata (`feature_columns.pkl`) and model-specific encodings to reproduce or extend the analyses.
 
 ### Model Evaluation and Navigation
@@ -73,7 +73,7 @@ This folder contains resources and analyses focused on predicting positional ran
 To navigate effectively:
 
 1. **Start with** `mcda_model_rank_prediction.ipynb` to follow the full modeling workflow.
-2. Move to **`enhanced-positional-notebook.ipynb`** for detailed insights into enhanced positional modeling and PCA-based feature transformations.
+2. Move to **`positional_models_notebook.ipynb`** for detailed insights into enhanced positional modeling and PCA-based feature transformations.
 3. Refer to saved models in the `saved_models_mcda_model_rank_prediction` folder for immediate application or further experimentation.
 4. Use datasets in the `data_outputs` folder for consistent data reference across analyses.
 
