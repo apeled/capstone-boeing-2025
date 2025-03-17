@@ -1,73 +1,80 @@
-Comprehensive analysis and prediction system for ordinal ranks generated from multiple decision criteria. The project focuses on identifying key rank drivers, predicting future ranks, applying proper ordinal modeling techniques, handling high dimensionality data, and maintaining interpretability for decision analysis.
+# MCDA Rank Prediction Project
 
-## Repository Structure
+This folder contains resources and analyses focused on predicting positional rankings using machine learning techniques and Multi-Criteria Decision Analysis (MCDA). It is structured to guide users clearly through our modeling process, from data exploration to predictive modeling and evaluation.
 
-### Folder Directory
+## Contents
 
-- **mcda-rank-prediction.ipynb**: Main notebook containing the Multi-Criteria Decision Analysis and rank prediction methodology
-- **model_summary.csv**: Summary of all trained models and their performance metrics
-- **Rank.csv**: Original dataset with rank information and drivers
+### Notebooks
 
-### Data Folder
+- **`mcda_model_prediction.ipynb`**: Provides a comprehensive workflow for predicting rankings using MCDA. The notebook covers data exploration, preprocessing, extensive feature engineering, hyperparameter optimization, and model evaluation across multiple machine learning algorithms.
 
-- **original_dataset.csv**: Original dataset after initial preprocessing
-- **pca_features.csv**: Dataset with PCA-reduced features
-- **X_train_positional.csv**: Training set with positional feature encoding
-- **X_test_positional.csv**: Test set with positional feature encoding
-- **X_train_onehot.csv**: Training set with one-hot feature encoding
-- **X_test_onehot.csv**: Test set with one-hot feature encoding
-- **X_train_pca.csv**: Training set with PCA-reduced features
-- **X_test_pca.csv**: Test set with PCA-reduced features
-- **y_train.csv**: Target variable (ranks) for training
-- **y_test.csv**: Target variable (ranks) for testing
+- **`enhanced-positional-notebook.ipynb`**: Focuses specifically on advanced positional feature engineering, including PCA transformations and positional encodings. This notebook implements and compares various models (Random Forest, Gradient Boosting, LightGBM, XGBoost) with these enhanced features to improve predictive accuracy.
 
-### Saved Models & Features Folder
+### Data Outputs (`data_outputs` Folder)
 
-- **best_rank_prediction_model.pkl**: Best performing model based on evaluation metrics
-- **feature_columns.pkl**: Lists of feature columns for different encoding methods
-- **gradient_boosting_one-hot.pkl**: Gradient Boosting model trained with one-hot encoding
-- **gradient_boosting_pca.pkl**: Gradient Boosting model trained with PCA features
-- **gradient_boosting_positional.pkl**: Gradient Boosting model trained with positional encoding
-- **lightgbm_one-hot.pkl**: LightGBM model trained with one-hot encoding
-- **lightgbm_positional.pkl**: LightGBM model trained with positional encoding
-- **mord_logisticit_one-hot.pkl**: Ordinal regression model (Mord LogisticIT) with one-hot encoding
+- Contains processed datasets ready for modeling:
+  - Training and test datasets (`X_train`, `X_test`, `y_train`, `y_test`)
+  - Original and PCA-transformed datasets (`original_dataset.csv`, `pca_features.csv`)
+  - Various feature engineering outputs (positional, PCA-based, and one-hot encoded features)
 
-## Methodology
+### Saved Models
 
-This project implements a comprehensive approach to analyzing and predicting ordinal ranks:
+- **Main Models (`*.pkl` files)**:
+  - Gradient Boosting, LightGBM, Random Forest, and XGBoost models trained using enhanced positional features and PCA transformations.
 
-1. **Data Preprocessing**: Cleaning and structuring the raw rank data
-2. **Feature Engineering**: Creating meaningful features that capture temporal patterns and driver positions
-3. **Dimension Reduction**: Applying PCA to handle high-dimensional one-hot encoded data
-4. **Driver Analysis**: Identifying which factors contribute most significantly to rank scores
-5. **Model Training**: Experimenting with multiple models including tree-based algorithms and ordinal regression
-6. **Evaluation**: Comparing models using metrics appropriate for ordinal prediction tasks
-7. **Forecasting**: Predicting future ranks based on historical patterns
+- **`saved_models_mcda_prediction` folder**:
+  - Contains the trained models based on different feature sets (one-hot, PCA, positional).
+  - Feature metadata (`feature_columns.pkl`) and model-specific encodings to reproduce or extend the analyses.
 
-## Models Implemented
+### Model Evaluation and Navigation
 
-- Random Forest Regression
-- Gradient Boosting Regression
-- LightGBM Regression
-- XGBoost Regression
-- Mord LogisticIT (Ordinal Regression)
+To navigate effectively:
 
-Each model is implemented with different feature encoding approaches (positional, one-hot, PCA) to determine the optimal combination of model and feature representation.
+1. Start with `mcda_model_rank_prediction.ipynb` to follow the full modeling workflow.
+2. Move to **`positional_models_notebook.ipynb`** for detailed insights into enhanced positional modeling and PCA-based feature transformations.
+3. Refer to saved models in the `saved_models_mcda_model_rank_prediction` folder for immediate application or further experimentation.
+4. Use datasets in the `data_outputs` folder for consistent data reference across analyses.
 
-## Usage
+This setup facilitates a comprehensive understanding of MCDA rank prediction modeling, including the impact of advanced feature engineering and systematic hyperparameter optimization.
 
-The main analysis and code are contained in the Jupyter notebooks. To replicate the analysis:
+### Folder Structure
 
-1. Start with `mcda-rank-prediction.ipynb` for the core methodology
-2. Explore `enhanced-rank-prediction.ipynb` for additional features and improvements
-3. The saved models can be loaded for making new predictions on unseen data
-
-## Data Description
-
-The dataset (`Rank.csv`) contains:
-- Rank scores (ordinal target variable)
-- Multiple decision criteria (Drivers 1-17)
-- Subject IDs for longitudinal tracking
-- Timestamps for tracking rank changes over time
-
-The models aim to understand how these drivers influence rank and predict future rank positions.
+```
+├── README.md
+├── data_outputs
+│   ├── X_test_onehot.csv
+│   ├── X_test_pca.csv
+│   ├── X_test_positional.csv
+│   ├── X_train_onehot.csv
+│   ├── X_train_pca.csv
+│   ├── X_train_positional.csv
+│   ├── original_dataset.csv
+│   ├── pca_features.csv
+│   ├── y_test.csv
+│   └── y_train.csv
+├── gradient_boosting_enhanced.pkl
+├── lightgbm_enhanced.pkl
+├── mcda_model_rank_prediction.ipynb
+├── model_summary.csv
+├── model_summary_enhanced.csv
+├── model_summary_enhanced_combined.csv
+├── positional_models_notebook.ipynb
+├── random_forest_enhanced.pkl
+├── xgboost_enhanced.pkl
+├── saved_models_mcda_model_rank_prediction
+    ├── best_rank_prediction_model.pkl
+    ├── feature_columns.pkl
+    ├── gradient_boosting_one-hot.pkl
+    ├── gradient_boosting_pca.pkl
+    ├── gradient_boosting_positional.pkl
+    ├── lightgbm_one-hot.pkl
+    ├── lightgbm_positional.pkl
+    ├── mord_logisticit_one-hot.pkl
+    ├── onehot_features.csv
+    ├── pca_model.pkl
+    ├── positional_features.csv
+    ├── random_forest_one-hot.pkl
+    ├── random_forest_pca.pkl
+    ├── random_forest_positional.pkl
+    └── xgboost_positional.pkl
+```
