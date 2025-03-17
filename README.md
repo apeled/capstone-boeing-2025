@@ -33,8 +33,8 @@ capstone-boeing-2025/
 │   ├── RankLab Cloud Architecture.pdf
 │   └── user_guide.md     
 ├── models/               # Saved model files and model testing
-│   ├── mcda-rank-prediction.ipynb
-│   └── enhanced-rank-prediction.ipynb
+│   ├── mcda_model_rank_prediction.ipynb
+│   └── positional_models_notebook.ipynb
 ├── tests/                # Test files
 │   ├── app_test.py       # Tests for the Dash app
 │   └── seed_db_test.py   # Tests for the SQLite database
@@ -68,12 +68,12 @@ pip install -r requirements.txt
 
 The core methodology and model development are contained in Jupyter notebooks:
 
-1. Start with `models/mcda-rank-prediction.ipynb` for the fundamental methodology:
+1. Start with `models/mcda_model_rank_prediction.ipynb` for the fundamental methodology:
    - Baseline Mean Absolute Error (MAE) using median rank
    - Multivariate Ordinal Regression model (MORD) implementation
    - Tree-based ensemble methods (Random Forest, XGBoost, LightGBM, Gradient Boosting)
 
-2. Explore `models/enhanced-rank-prediction.ipynb` for additional features and improvements:
+2. Explore `models/positional_models_notebook.ipynb` for additional features and improvements:
    - Feature engineering
    - Hyperparameter optimization
    - Model evaluation and comparison
