@@ -30,7 +30,7 @@ This folder contains resources and analyses focused on predicting positional ran
 
 To navigate effectively:
 
-1. **Start with** `mcda_model_rank_prediction.ipynb` to follow the full modeling workflow.
+1. Start with `mcda_model_rank_prediction.ipynb` to follow the full modeling workflow.
 2. Move to **`positional_models_notebook.ipynb`** for detailed insights into enhanced positional modeling and PCA-based feature transformations.
 3. Refer to saved models in the `saved_models_mcda_model_rank_prediction` folder for immediate application or further experimentation.
 4. Use datasets in the `data_outputs` folder for consistent data reference across analyses.
